@@ -14,7 +14,7 @@
   </div>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" class="space-y-5">
+  <form id="found-form" method="post" enctype="multipart/form-data" class="space-y-5" onsubmit="showLoader(this)">
 
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1" for="contact_info">
@@ -45,12 +45,34 @@
       <p class="text-xs text-gray-400 mt-1" data-i18n="found.photo_hint">JPG, PNG or WEBP. The photo must show a clear face.</p>
     </div>
 
-    <button type="submit"
-            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition"
+    <button id="found-submit" type="submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
             data-i18n="found.submit">
       Submit &amp; Search for Matches
     </button>
 
   </form>
 </div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay"
+     class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+  <div class="bg-white rounded-2xl shadow-2xl px-10 py-8 flex flex-col items-center gap-4 max-w-xs w-full text-center">
+    <svg class="animate-spin h-10 w-10 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+    </svg>
+    <p class="text-gray-800 font-semibold text-base" data-i18n="loading.title">Analyzing photo…</p>
+    <p class="text-gray-500 text-sm" data-i18n="loading.desc">This may take a few seconds while we scan for matching faces.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function showLoader(form) {
+    document.getElementById('loading-overlay').classList.remove('hidden');
+    document.getElementById('found-submit').disabled = true;
+  }
+</script>
 {% endblock %}
