@@ -90,6 +90,8 @@ async def report_missing_submit(
 
         session.commit()
 
+    if not hits:
+        return RedirectResponse("/matches?no_match=1", status_code=status.HTTP_303_SEE_OTHER)
     return RedirectResponse("/matches", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -142,11 +144,13 @@ async def report_found_submit(
 
         session.commit()
 
+    if not hits:
+        return RedirectResponse("/matches?no_match=1", status_code=status.HTTP_303_SEE_OTHER)
     return RedirectResponse("/matches", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @app.get("/matches", response_class=HTMLResponse)
-async def matches_page(request: Request):
+async def matches_page(request: Request, no_match: int = 0):
     with get_session() as session:
         matches = (
             session.query(Match)
@@ -169,4 +173,4 @@ async def matches_page(request: Request):
             for m in matches
         ]
 
-    return templates.TemplateResponse("matches.html", {"request": request, "matches": rows})
+    return templates.TemplateResponse("matches.html", {"request": request, "matches": rows, "no_match": no_match})
