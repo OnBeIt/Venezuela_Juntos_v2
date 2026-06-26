@@ -1,4 +1,4 @@
-# Disaster Relief Face Match — CLAUDE.md
+# Venezuela Juntos
 
 ## What this project is
 
@@ -13,7 +13,7 @@ matches on a public page so families can reach the rescuer directly.
 
 ```
 disaster-relief-app/        ← you are here (this is the self-contained app root)
-├── CLAUDE.md               ← this file
+├── README.md               ← this file
 ├── main.py                 ← FastAPI app + all routes
 ├── database.py             ← SQLAlchemy models + SQLite engine
 ├── matching.py             ← face embedding + vectorized search wrapper
