@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Register a Found Person{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white rounded-2xl shadow p-8 border-t-4 border-green-600">
+  <h1 class="text-2xl font-bold text-gray-800 mb-1" data-i18n="found.page_title">Register a Found Person</h1>
+  <p class="text-gray-500 text-sm mb-6">
+    <span data-i18n="found.subtitle_before">Upload a photo of the person you have found. Your contact details will be shown to families whose photos match. Confirmed matches also appear on the </span><a href="/matches" class="underline text-green-600" data-i18n="found.subtitle_link">matches page</a>.
+  </p>
+
+  {% if error %}
+  <div class="bg-red-50 border border-red-300 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-5">
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="contact_info">
+        <span data-i18n="found.contact_label">Contact phone or email</span> <span class="text-red-500">*</span>
+      </label>
+      <input type="text" id="contact_info" name="contact_info" required
+             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+             data-i18n-ph="found.contact_placeholder" placeholder="e.g. +1 555 0100 or rescuer@example.org" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="notes">
+        <span data-i18n="found.notes_label">Notes</span> <span class="text-gray-400" data-i18n="form.optional">(optional)</span>
+      </label>
+      <textarea id="notes" name="notes" rows="3"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                data-i18n-ph="found.notes_placeholder" placeholder="Current location, condition, shelter name…"></textarea>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="photo">
+        <span data-i18n="found.photo_label">Photo</span> <span class="text-red-500">*</span>
+      </label>
+      <input type="file" id="photo" name="photo" required accept="image/*"
+             class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0 file:text-sm file:font-medium
+                    file:bg-green-50 file:text-green-700 hover:file:bg-green-100" />
+      <p class="text-xs text-gray-400 mt-1" data-i18n="found.photo_hint">JPG, PNG or WEBP. The photo must show a clear face.</p>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition"
+            data-i18n="found.submit">
+      Submit &amp; Search for Matches
+    </button>
+
+  </form>
+</div>
+{% endblock %}

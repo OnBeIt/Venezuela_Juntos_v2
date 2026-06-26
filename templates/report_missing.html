@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Report a Missing Person{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white rounded-2xl shadow p-8 border-t-4 border-red-600">
+  <h1 class="text-2xl font-bold text-gray-800 mb-1" data-i18n="missing.page_title">Report a Missing Person</h1>
+  <p class="text-gray-500 text-sm mb-6">
+    <span data-i18n="missing.subtitle_before">We will automatically compare this photo against every found-person entry in our system. Any confirmed matches will appear on the </span><a href="/matches" class="underline text-red-600" data-i18n="missing.subtitle_link">matches page</a>.
+  </p>
+
+  {% if error %}
+  <div class="bg-red-50 border border-red-300 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-5">
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="name">
+        <span data-i18n="missing.name_label">Full name</span> <span class="text-red-500">*</span>
+      </label>
+      <input type="text" id="name" name="name" required
+             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+             data-i18n-ph="missing.name_placeholder" placeholder="e.g. Maria Santos" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="description">
+        <span data-i18n="missing.desc_label">Description</span> <span class="text-gray-400" data-i18n="form.optional">(optional)</span>
+      </label>
+      <textarea id="description" name="description" rows="3"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                data-i18n-ph="missing.desc_placeholder" placeholder="Age, clothing, last known location…"></textarea>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="photo">
+        <span data-i18n="missing.photo_label">Photo</span> <span class="text-red-500">*</span>
+      </label>
+      <input type="file" id="photo" name="photo" required accept="image/*"
+             class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0 file:text-sm file:font-medium
+                    file:bg-red-50 file:text-red-700 hover:file:bg-red-100" />
+      <p class="text-xs text-gray-400 mt-1" data-i18n="missing.photo_hint">JPG, PNG or WEBP. The photo must show a clear face.</p>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg transition"
+            data-i18n="missing.submit">
+      Submit &amp; Search for Matches
+    </button>
+
+  </form>
+</div>
+{% endblock %}

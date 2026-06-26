@@ -1,0 +1,10 @@
+fastapi==0.115.0
+uvicorn[standard]>=0.29
+sqlalchemy>=2.0
+python-multipart>=0.0.9
+jinja2==3.1.4
+aiofiles>=23.0
+insightface==1.0.1
+onnxruntime>=1.27.0
+opencv-python-headless>=4.13.0
+numpy>=2.0

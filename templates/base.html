@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Venezuela Juntos{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Site-wide disclaimer — shown once per browser session -->
+  <div id="disclaimer-modal"
+       class="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm px-4 py-6 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 my-auto">
+
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-gray-800" data-i18n="disclaimer.title">Antes de Continuar</h2>
+        <div class="flex items-center gap-1 text-sm text-gray-500">
+          <button id="disclaimer-lang-en" onclick="setLang('en')" class="hover:underline transition-opacity px-1">EN</button>
+          <span class="opacity-40">|</span>
+          <button id="disclaimer-lang-es" onclick="setLang('es')" class="hover:underline transition-opacity px-1">ES</button>
+        </div>
+      </div>
+
+      <div class="flex gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 mt-0.5 shrink-0" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <p class="text-sm text-red-700" data-i18n="disclaimer.warning1">
+          Algunas fotos en este sitio pueden mostrar personas heridas o fallecidas. Se recomienda discreción.
+        </p>
+      </div>
+
+      <div class="flex gap-3 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z"/>
+        </svg>
+        <p class="text-sm text-yellow-700" data-i18n="disclaimer.warning2">
+          Las coincidencias de reconocimiento facial no son 100% precisas. Siempre verifica por otros medios antes de actuar.
+        </p>
+      </div>
+
+      <div class="mb-4">
+        <h3 class="text-sm font-semibold text-gray-700 mb-1" data-i18n="disclaimer.how_title">Cómo funciona</h3>
+        <p class="text-sm text-gray-500 leading-relaxed" data-i18n="disclaimer.how_desc">
+          Las fotos se analizan con reconocimiento facial por inteligencia artificial. Cada rostro se convierte en una huella matemática única de 512 puntos. El sistema compara todas las entradas y marca los pares que superan el umbral de similitud. Un porcentaje más alto indica mayor similitud, pero no garantiza que sean la misma persona.
+        </p>
+      </div>
+
+      <div class="flex gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 mb-5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mt-0.5 shrink-0" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-sm text-gray-500" data-i18n="disclaimer.responsibility">
+          El autor de esta plataforma no asume ninguna responsabilidad por coincidencias incorrectas o faltantes, ni por acciones tomadas basándose en la información aquí mostrada. Esta herramienta se ofrece únicamente como ayuda humanitaria.
+        </p>
+      </div>
+
+      <button onclick="closeDisclaimer()"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold py-3 rounded-lg transition text-base"
+              data-i18n="disclaimer.btn">
+        Entiendo, Continuar
+      </button>
+    </div>
+  </div>
+
+  <header class="bg-blue-700 text-white shadow-md">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 text-lg font-bold tracking-tight">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 100-8 4 4 0 000 8z"/>
+        </svg>
+        Venezuela Juntos
+        <span class="text-base ml-1">🇻🇪</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-4 text-sm font-medium">
+        <a href="/report-missing" class="hover:underline" data-i18n="nav.report_missing">Reportar Desaparecido</a>
+        <a href="/report-found"   class="hover:underline" data-i18n="nav.report_found">Reportar Hallado</a>
+        <a href="/matches"        class="hover:underline" data-i18n="nav.view_matches">Ver Coincidencias</a>
+        <button onclick="openHelp()" aria-label="Help"
+                class="w-6 h-6 rounded-full border-2 border-white/70 text-white/90 font-bold text-xs
+                       hover:bg-white hover:text-blue-700 transition flex items-center justify-center">?</button>
+        <div class="flex items-center gap-1 border-l border-blue-400 pl-4 ml-1">
+          <button id="lang-en" onclick="setLang('en')" class="hover:underline transition-opacity">EN</button>
+          <span class="opacity-40">|</span>
+          <button id="lang-es" onclick="setLang('es')" class="hover:underline transition-opacity">ES</button>
+        </div>
+      </nav>
+
+      <!-- Mobile: lang toggle + ? + hamburger -->
+      <div class="flex items-center gap-3 md:hidden">
+        <div class="flex items-center gap-1 text-sm">
+          <button id="lang-en-m" onclick="setLang('en')" class="hover:underline transition-opacity">EN</button>
+          <span class="opacity-40">|</span>
+          <button id="lang-es-m" onclick="setLang('es')" class="hover:underline transition-opacity">ES</button>
+        </div>
+        <button onclick="openHelp()" aria-label="Help"
+                class="w-6 h-6 rounded-full border-2 border-white/70 text-white/90 font-bold text-xs
+                       hover:bg-white hover:text-blue-700 transition flex items-center justify-center">?</button>
+        <button onclick="toggleMenu()" aria-label="Menu"
+                class="p-1 rounded focus:outline-none focus:ring-2 focus:ring-white">
+          <svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-blue-800 px-4 pb-4 space-y-2 text-sm font-medium">
+      <a href="/report-missing" class="block py-2 hover:underline" data-i18n="nav.report_missing">Reportar Desaparecido</a>
+      <a href="/report-found"   class="block py-2 hover:underline" data-i18n="nav.report_found">Reportar Hallado</a>
+      <a href="/matches"        class="block py-2 hover:underline" data-i18n="nav.view_matches">Ver Coincidencias</a>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-6 md:py-10">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Help modal -->
+  <div id="help-modal"
+       class="hidden fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm px-4 py-6 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 my-auto">
+
+      <div class="flex justify-between items-start mb-5">
+        <h2 class="text-lg font-bold text-gray-800 pr-4" data-i18n="help.title">Cómo funciona Venezuela Juntos</h2>
+        <button onclick="closeHelp()"
+                class="text-gray-400 hover:text-gray-600 text-2xl leading-none shrink-0">&times;</button>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="flex gap-3 mb-4">
+        <div class="w-7 h-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center shrink-0">1</div>
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-0.5" data-i18n="help.step1_title">Reportar una persona desaparecida</p>
+          <p class="text-sm text-gray-500" data-i18n="help.step1_desc">Un familiar sube una foto de la persona que busca y escribe su nombre. El sistema extrae una huella facial y la guarda.</p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex gap-3 mb-4">
+        <div class="w-7 h-7 rounded-full bg-green-600 text-white text-sm font-bold flex items-center justify-center shrink-0">2</div>
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-0.5" data-i18n="help.step2_title">Registrar una persona hallada</p>
+          <p class="text-sm text-gray-500" data-i18n="help.step2_desc">Un rescatista sube una foto de alguien que encontró y añade su número de teléfono o correo electrónico como contacto.</p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex gap-3 mb-4">
+        <div class="w-7 h-7 rounded-full bg-indigo-600 text-white text-sm font-bold flex items-center justify-center shrink-0">3</div>
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-0.5" data-i18n="help.step3_title">Comparación automática de rostros</p>
+          <p class="text-sm text-gray-500" data-i18n="help.step3_desc">Al subir cada foto, el sistema la compara automáticamente con todos los registros del otro grupo usando inteligencia artificial.</p>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="flex gap-3 mb-5">
+        <div class="w-7 h-7 rounded-full bg-yellow-500 text-white text-sm font-bold flex items-center justify-center shrink-0">4</div>
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-0.5" data-i18n="help.step4_title">Ver coincidencias y contactar</p>
+          <p class="text-sm text-gray-500" data-i18n="help.step4_desc">Las parejas con alta similitud aparecen en la página de Coincidencias con el contacto del rescatista. La familia puede comunicarse directamente.</p>
+        </div>
+      </div>
+
+      <!-- Important note -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-5">
+        <p class="text-sm font-semibold text-blue-700 mb-1" data-i18n="help.note_title">Importante</p>
+        <ul class="text-sm text-blue-600 space-y-1 list-disc list-inside" data-i18n="help.note_body">
+          Solo se muestran personas que han sido encontradas y registradas en el sistema. Una persona desaparecida no aparecerá en los resultados hasta que un rescatista la haya registrado. Los porcentajes son una guía — siempre confirma la identidad antes de actuar.
+        </ul>
+      </div>
+
+      <button onclick="closeHelp()"
+              class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 rounded-lg transition"
+              data-i18n="help.close">Cerrar</button>
+    </div>
+  </div>
+
+  <footer class="text-center text-xs text-gray-400 py-4 px-4">
+    <span data-i18n="footer.text">Todas las fotos son procesadas únicamente con el propósito de reunir familias. Los datos faciales no se comparten con terceros.</span>
+  </footer>
+
+  <script>
+    var T = {
+      en: {
+        'nav.report_missing': 'Report Missing',
+        'nav.report_found':   'Report Found',
+        'nav.view_matches':   'View Matches',
+        'footer.text': 'All photos are processed solely for the purpose of reuniting families. Face data is not shared with third parties.',
+        'home.title':        'Venezuela Juntos',
+        'home.subtitle':     'Bringing Venezuelans back together. Upload a photo to report a missing person or register someone who has been found. Our system automatically matches faces across both lists.',
+        'home.missing_title': 'Looking for someone?',
+        'home.missing_desc':  'Upload a photo of the person you are searching for. We will notify you if a rescuer has registered a matching face.',
+        'home.missing_link':  'Report a missing person →',
+        'home.found_title':  'Found someone?',
+        'home.found_desc':   'Upload a photo of the person you have found and add your contact details. Families searching for a match will be shown your information.',
+        'home.found_link':   'Register a found person →',
+        'home.view_matches': 'View all confirmed matches',
+        'missing.page_title':      'Report a Missing Person',
+        'missing.subtitle_before': 'We will automatically compare this photo against every found-person entry in our system. Any confirmed matches will appear on the ',
+        'missing.subtitle_link':   'matches page',
+        'missing.name_label':        'Full name',
+        'missing.name_placeholder':  'e.g. Maria Santos',
+        'missing.desc_label':        'Description',
+        'missing.desc_placeholder':  'Age, clothing, last known location…',
+        'missing.photo_label':       'Photo',
+        'missing.photo_hint':        'JPG, PNG or WEBP. The photo must show a clear face.',
+        'missing.submit':            'Submit & Search for Matches',
+        'found.page_title':         'Register a Found Person',
+        'found.subtitle_before':    'Upload a photo of the person you have found. Your contact details will be shown to families whose photos match. Confirmed matches also appear on the ',
+        'found.subtitle_link':      'matches page',
+        'found.contact_label':       'Contact phone or email',
+        'found.contact_placeholder': 'e.g. +1 555 0100 or rescuer@example.org',
+        'found.notes_label':         'Notes',
+        'found.notes_placeholder':   'Current location, condition, shelter name…',
+        'found.photo_label':         'Photo',
+        'found.photo_hint':          'JPG, PNG or WEBP. The photo must show a clear face.',
+        'found.submit':              'Submit & Search for Matches',
+        'form.optional': '(optional)',
+        'matches.title':    'Confirmed Matches',
+        'matches.subtitle': 'Each card shows a missing-person report paired with a found-person entry whose faces matched above the confidence threshold.',
+        'matches.search_placeholder': 'Search by name…',
+        'matches.no_results':    'No cards match your search.',
+        'matches.label_missing': 'Missing',
+        'matches.label_found':   'Found',
+        'matches.pct_word':      'match',
+        'matches.contact_label': 'Rescuer contact',
+        'matches.empty_title':   'No matches yet',
+        'matches.empty_desc':    'Matches will appear here once the system finds a face that corresponds between the missing and found lists.',
+        'matches.btn_missing':   'Report missing',
+        'matches.btn_found':     'Register found',
+        'disclaimer.title':    'Before You Continue',
+        'disclaimer.warning1': 'Some photos on this site may show persons who are injured or have deceased. Viewer discretion is advised.',
+        'disclaimer.warning2': 'Facial recognition matches are not 100% accurate. Always verify through additional means before acting on any match.',
+        'disclaimer.how_title': 'How it works',
+        'disclaimer.how_desc':  'Photos are analyzed using AI-powered face recognition. Each face is converted into a 512-point mathematical fingerprint. The system compares all missing and found entries and flags pairs that exceed the similarity threshold. A higher percentage means greater facial similarity — but does not guarantee the persons are the same.',
+        'disclaimer.responsibility': 'The author of this platform accepts no responsibility for incorrect matches, missing matches, or any actions taken based on the information shown here. This tool is provided as a humanitarian aid only.',
+        'disclaimer.btn': 'I Understand, Continue',
+        'help.title':       'How Venezuela Juntos Works',
+        'help.step1_title': 'Report a missing person',
+        'help.step1_desc':  'A family member uploads a photo of the person they are looking for and enters their name. The system extracts a face fingerprint and saves it.',
+        'help.step2_title': 'Register a found person',
+        'help.step2_desc':  'A rescuer uploads a photo of someone they have found and adds their phone number or email as a contact.',
+        'help.step3_title': 'Automatic face comparison',
+        'help.step3_desc':  'Every time a photo is uploaded, the system automatically compares it against all records in the opposite group using AI.',
+        'help.step4_title': 'View matches and make contact',
+        'help.step4_desc':  'Pairs with high similarity appear on the Matches page with the rescuer\'s contact details. The family can reach out directly.',
+        'help.note_title':  'Important',
+        'help.note_body':   'Only people who have been found and registered in the system will appear in results. A missing person will not show up until a rescuer has registered them. Percentages are a guide — always confirm identity before taking action.',
+        'help.close':       'Close',
+      },
+      es: {
+        'nav.report_missing': 'Reportar Desaparecido',
+        'nav.report_found':   'Reportar Hallado',
+        'nav.view_matches':   'Ver Coincidencias',
+        'footer.text': 'Todas las fotos son procesadas únicamente con el propósito de reunir familias. Los datos faciales no se comparten con terceros.',
+        'home.title':        'Venezuela Juntos',
+        'home.subtitle':     'Reencontrando a los venezolanos. Sube una foto para reportar una persona desaparecida o registrar a alguien que fue encontrado. Nuestro sistema compara automáticamente los rostros en ambas listas.',
+        'home.missing_title': '¿Buscas a alguien?',
+        'home.missing_desc':  'Sube una foto de la persona que estás buscando. Te avisaremos si un rescatista ha registrado un rostro que coincida.',
+        'home.missing_link':  'Reportar persona desaparecida →',
+        'home.found_title':  '¿Encontraste a alguien?',
+        'home.found_desc':   'Sube una foto de la persona que encontraste y añade tus datos de contacto. Las familias que busquen una coincidencia verán tu información.',
+        'home.found_link':   'Registrar persona hallada →',
+        'home.view_matches': 'Ver todas las coincidencias confirmadas',
+        'missing.page_title':      'Reportar una Persona Desaparecida',
+        'missing.subtitle_before': 'Compararemos automáticamente esta foto con todas las entradas del sistema. Las coincidencias confirmadas aparecerán en la ',
+        'missing.subtitle_link':   'página de coincidencias',
+        'missing.name_label':        'Nombre completo',
+        'missing.name_placeholder':  'ej. María Santos',
+        'missing.desc_label':        'Descripción',
+        'missing.desc_placeholder':  'Edad, ropa, último lugar conocido…',
+        'missing.photo_label':       'Foto',
+        'missing.photo_hint':        'JPG, PNG o WEBP. La foto debe mostrar un rostro claro.',
+        'missing.submit':            'Enviar y Buscar Coincidencias',
+        'found.page_title':         'Registrar una Persona Hallada',
+        'found.subtitle_before':    'Sube una foto de la persona que encontraste. Tus datos de contacto serán mostrados a las familias cuyas fotos coincidan. Las coincidencias también aparecen en la ',
+        'found.subtitle_link':      'página de coincidencias',
+        'found.contact_label':       'Teléfono o correo de contacto',
+        'found.contact_placeholder': 'ej. +58 412 0000000 o rescatista@ejemplo.com',
+        'found.notes_label':         'Notas',
+        'found.notes_placeholder':   'Ubicación actual, condición, nombre del refugio…',
+        'found.photo_label':         'Foto',
+        'found.photo_hint':          'JPG, PNG o WEBP. La foto debe mostrar un rostro claro.',
+        'found.submit':              'Enviar y Buscar Coincidencias',
+        'form.optional': '(opcional)',
+        'matches.title':    'Coincidencias Confirmadas',
+        'matches.subtitle': 'Cada tarjeta muestra un reporte de persona desaparecida junto a una entrada de persona hallada cuyos rostros coincidieron por encima del umbral de confianza.',
+        'matches.search_placeholder': 'Buscar por nombre…',
+        'matches.no_results':    'Ninguna tarjeta coincide con tu búsqueda.',
+        'matches.label_missing': 'Desaparecido/a',
+        'matches.label_found':   'Hallado/a',
+        'matches.pct_word':      'de coincidencia',
+        'matches.contact_label': 'Contacto del rescatista',
+        'matches.empty_title':   'Sin coincidencias aún',
+        'matches.empty_desc':    'Las coincidencias aparecerán aquí una vez que el sistema encuentre un rostro que corresponda entre las listas de desaparecidos y hallados.',
+        'matches.btn_missing':   'Reportar desaparecido',
+        'matches.btn_found':     'Registrar hallado',
+        'disclaimer.title':    'Antes de Continuar',
+        'disclaimer.warning1': 'Algunas fotos en este sitio pueden mostrar personas heridas o fallecidas. Se recomienda discreción.',
+        'disclaimer.warning2': 'Las coincidencias de reconocimiento facial no son 100% precisas. Siempre verifica por otros medios antes de actuar sobre cualquier coincidencia.',
+        'disclaimer.how_title': 'Cómo funciona',
+        'disclaimer.how_desc':  'Las fotos se analizan con reconocimiento facial por inteligencia artificial. Cada rostro se convierte en una huella matemática única de 512 puntos. El sistema compara todas las entradas de desaparecidos y hallados, y marca los pares que superan el umbral de similitud. Un porcentaje más alto indica mayor similitud facial, pero no garantiza que las personas sean la misma.',
+        'disclaimer.responsibility': 'El autor de esta plataforma no asume ninguna responsabilidad por coincidencias incorrectas o faltantes, ni por acciones tomadas basándose en la información aquí mostrada. Esta herramienta se ofrece únicamente como ayuda humanitaria.',
+        'disclaimer.btn': 'Entiendo, Continuar',
+        'help.title':       'Cómo funciona Venezuela Juntos',
+        'help.step1_title': 'Reportar una persona desaparecida',
+        'help.step1_desc':  'Un familiar sube una foto de la persona que busca y escribe su nombre. El sistema extrae una huella facial y la guarda.',
+        'help.step2_title': 'Registrar una persona hallada',
+        'help.step2_desc':  'Un rescatista sube una foto de alguien que encontró y añade su número de teléfono o correo electrónico como contacto.',
+        'help.step3_title': 'Comparación automática de rostros',
+        'help.step3_desc':  'Al subir cada foto, el sistema la compara automáticamente con todos los registros del otro grupo usando inteligencia artificial.',
+        'help.step4_title': 'Ver coincidencias y contactar',
+        'help.step4_desc':  'Las parejas con alta similitud aparecen en la página de Coincidencias con el contacto del rescatista. La familia puede comunicarse directamente.',
+        'help.note_title':  'Importante',
+        'help.note_body':   'Solo se muestran personas que han sido encontradas y registradas en el sistema. Una persona desaparecida no aparecerá en los resultados hasta que un rescatista la haya registrado. Los porcentajes son una guía — siempre confirma la identidad antes de actuar.',
+        'help.close':       'Cerrar',
+      }
+    };
+
+    function applyLanguage(lang) {
+      localStorage.setItem('drfm-lang', lang);
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        if (T[lang] && T[lang][key] !== undefined) el.textContent = T[lang][key];
+      });
+      document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n-ph');
+        if (T[lang] && T[lang][key] !== undefined) el.placeholder = T[lang][key];
+      });
+      ['en', 'es'].forEach(function(l) {
+        ['lang-', 'disclaimer-lang-'].forEach(function(prefix) {
+          var btn = document.getElementById(prefix + l);
+          if (!btn) return;
+          btn.style.fontWeight = (l === lang) ? 'bold' : 'normal';
+          btn.style.textDecoration = (l === lang) ? 'underline' : 'none';
+          btn.style.opacity = (l === lang) ? '1' : '0.65';
+        });
+        // mobile lang buttons use full IDs
+        var mb = document.getElementById('lang-' + l + '-m');
+        if (mb) {
+          mb.style.fontWeight = (l === lang) ? 'bold' : 'normal';
+          mb.style.textDecoration = (l === lang) ? 'underline' : 'none';
+          mb.style.opacity = (l === lang) ? '1' : '0.65';
+        }
+      });
+    }
+
+    function setLang(lang) { applyLanguage(lang); }
+
+    function closeDisclaimer() {
+      sessionStorage.setItem('drfm-disclaimer-seen', '1');
+      document.getElementById('disclaimer-modal').style.display = 'none';
+    }
+
+    function openHelp() {
+      document.getElementById('help-modal').classList.remove('hidden');
+    }
+
+    function closeHelp() {
+      document.getElementById('help-modal').classList.add('hidden');
+    }
+
+    function toggleMenu() {
+      var m = document.getElementById('mobile-menu');
+      m.classList.toggle('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      applyLanguage(localStorage.getItem('drfm-lang') || 'es');
+      if (sessionStorage.getItem('drfm-disclaimer-seen')) {
+        document.getElementById('disclaimer-modal').style.display = 'none';
+      }
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>
