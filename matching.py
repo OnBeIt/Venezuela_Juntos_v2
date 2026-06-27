@@ -11,6 +11,11 @@ EMBEDDING_DIM = 512
 THRESHOLD = facerec.DEFAULT_MATCH_THRESHOLD
 
 
+def warmup() -> None:
+    """Load the InsightFace model into memory. Call once at startup."""
+    facerec.get_app()
+
+
 def embed(image_bytes: bytes) -> np.ndarray:
     """Return the 512-d normed embedding of the largest face in the image.
 

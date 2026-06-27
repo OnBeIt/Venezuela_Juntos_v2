@@ -1,5 +1,8 @@
+import asyncio
 import sys
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 # Allow bare imports of sibling modules (matching, database) regardless of
@@ -14,7 +17,19 @@ from fastapi.templating import Jinja2Templates
 import matching
 from database import DATA_DIR, FoundPerson, Match, MissingPerson, get_session, init_db
 
-app = FastAPI()
+_executor = ThreadPoolExecutor(max_workers=2)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Pre-warm the InsightFace model on startup so the first upload request
+    # doesn't time out loading the 280 MB model pack.
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(_executor, matching.warmup)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 init_db()
 
 UPLOADS_DIR = DATA_DIR / "uploads"
@@ -27,7 +42,6 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 def _save_upload(file: UploadFile, prefix: str) -> tuple[str, bytes]:
-    """Save upload to disk; return (relative path, raw bytes)."""
     ext = Path(file.filename).suffix.lower() if file.filename else ".jpg"
     filename = f"{prefix}_{uuid.uuid4().hex}{ext}"
     dest = UPLOADS_DIR / filename
@@ -57,8 +71,9 @@ async def report_missing_submit(
 ):
     filename, data = _save_upload(photo, "missing")
 
+    loop = asyncio.get_event_loop()
     try:
-        emb = matching.embed(data)
+        emb = await loop.run_in_executor(_executor, matching.embed, data)
     except ValueError as e:
         (UPLOADS_DIR / filename).unlink(missing_ok=True)
         return templates.TemplateResponse(
@@ -75,7 +90,7 @@ async def report_missing_submit(
             embedding=matching.embedding_to_blob(emb),
         )
         session.add(person)
-        session.flush()  # get person.id
+        session.flush()
 
         pool = session.query(FoundPerson).all()
         pool_pairs = [(fp, fp.embedding) for fp in pool]
@@ -111,8 +126,9 @@ async def report_found_submit(
 ):
     filename, data = _save_upload(photo, "found")
 
+    loop = asyncio.get_event_loop()
     try:
-        emb = matching.embed(data)
+        emb = await loop.run_in_executor(_executor, matching.embed, data)
     except ValueError as e:
         (UPLOADS_DIR / filename).unlink(missing_ok=True)
         return templates.TemplateResponse(
