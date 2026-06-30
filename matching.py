@@ -10,6 +10,14 @@ import facerec  # noqa: E402
 EMBEDDING_DIM = 512
 THRESHOLD = facerec.DEFAULT_MATCH_THRESHOLD
 
+# Quality heuristics for the largest detected face. A photo is flagged (warn,
+# don't block) when any of these fail — flagged photos still get embedded and
+# stored, but the user is warned that match quality may suffer. Tunable.
+MIN_BLUR_VAR = 40.0      # variance of Laplacian; lower = blurrier
+MIN_FACE_PX = 80 * 80    # detected face area in pixels; smaller = too distant
+MIN_BRIGHTNESS = 50.0    # mean luma 0..255; lower = too dark
+MAX_BRIGHTNESS = 205.0   # higher = blown out / overexposed
+
 
 def warmup() -> None:
     """Load the InsightFace model into memory. Call once at startup."""
@@ -25,6 +33,37 @@ def embed(image_bytes: bytes) -> np.ndarray:
     if not records:
         raise ValueError("No face detected in the uploaded image.")
     return records[0].normed_embedding.astype(np.float32)
+
+
+def _assess_quality(record) -> tuple[bool, str | None]:
+    """Return (low_quality, note) for the largest face's quality estimates."""
+    q = record.quality
+    reasons = []
+    if q.get("blur_var", 0.0) < MIN_BLUR_VAR:
+        reasons.append("blurry")
+    if q.get("face_px", 0.0) < MIN_FACE_PX:
+        reasons.append("face too small")
+    brightness = q.get("brightness", 128.0)
+    if brightness < MIN_BRIGHTNESS:
+        reasons.append("too dark")
+    elif brightness > MAX_BRIGHTNESS:
+        reasons.append("overexposed")
+    if not reasons:
+        return False, None
+    return True, ", ".join(reasons)
+
+
+def analyze(image_bytes: bytes) -> tuple[np.ndarray, bool, str | None]:
+    """Return (normed embedding, low_quality, quality_note) for the largest face.
+
+    Raises ValueError if no face is detected.
+    """
+    records = facerec.analyze_bytes(image_bytes)
+    if not records:
+        raise ValueError("No face detected in the uploaded image.")
+    primary = records[0]
+    low_quality, note = _assess_quality(primary)
+    return primary.normed_embedding.astype(np.float32), low_quality, note
 
 
 def embedding_to_blob(emb: np.ndarray) -> bytes:

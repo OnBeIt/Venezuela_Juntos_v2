@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Activity Log{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+  <div>
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Activity Log</h1>
+    <p class="text-gray-500 text-sm">
+      Most recent {{ events|length }} events (newest first). Times are UTC.
+    </p>
+  </div>
+  <a href="/admin"
+     class="shrink-0 inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-200 transition">
+    ← Back to admin
+  </a>
+</div>
+
+{% if events %}
+<div class="mb-4">
+  <input id="log-search" type="text" placeholder="Filter events…"
+         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+         oninput="filterLogs(this.value)" />
+</div>
+<div class="overflow-x-auto bg-white rounded-xl shadow">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-500 text-left">
+      <tr>
+        <th class="px-4 py-2 whitespace-nowrap">When (UTC)</th>
+        <th class="px-4 py-2">Event</th>
+        <th class="px-4 py-2">Actor</th>
+        <th class="px-4 py-2">Detail</th>
+        <th class="px-4 py-2">IP</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for e in events %}
+      <tr class="log-row align-top"
+          data-text="{{ (e.event_type ~ ' ' ~ e.actor ~ ' ' ~ e.message ~ ' ' ~ e.ip) | lower }}">
+        <td class="px-4 py-2 text-gray-400 whitespace-nowrap">{{ e.when }}</td>
+        <td class="px-4 py-2"><span class="text-xs font-mono bg-gray-100 text-gray-600 rounded px-1.5 py-0.5 whitespace-nowrap">{{ e.event_type }}</span></td>
+        <td class="px-4 py-2 text-gray-600 break-all">{{ e.actor }}</td>
+        <td class="px-4 py-2 text-gray-800">{{ e.message }}</td>
+        <td class="px-4 py-2 text-gray-400 whitespace-nowrap">{{ e.ip }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p id="log-no-results" class="hidden text-center text-gray-400 text-sm mt-6">No events match your filter.</p>
+{% else %}
+<div class="text-center py-16 text-gray-400">
+  <p class="text-lg font-medium">No activity yet</p>
+  <p class="text-sm mt-1">Events will appear here as people register, upload photos, and matches are made.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function filterLogs(query) {
+    var q = query.trim().toLowerCase();
+    var rows = document.querySelectorAll('.log-row');
+    var visible = 0;
+    rows.forEach(function(row) {
+      var text = row.getAttribute('data-text') || '';
+      var show = !q || text.indexOf(q) !== -1;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    var none = document.getElementById('log-no-results');
+    if (none) none.classList.toggle('hidden', visible > 0 || !q);
+  }
+</script>
+{% endblock %}

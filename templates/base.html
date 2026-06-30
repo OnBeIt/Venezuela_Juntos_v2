@@ -84,13 +84,29 @@
 
       <!-- Desktop nav -->
       <nav class="hidden md:flex items-center gap-4 text-sm font-medium">
+        {% if user %}
         <a href="/report-missing" class="hover:underline" data-i18n="nav.report_missing">Reportar Desaparecido</a>
         <a href="/report-found"   class="hover:underline" data-i18n="nav.report_found">Reportar Hallado</a>
         <a href="/matches"        class="hover:underline" data-i18n="nav.view_matches">Ver Coincidencias</a>
+        {% if is_admin %}
+        <a href="/admin" class="hover:underline text-yellow-200" data-i18n="nav.admin">Admin</a>
+        {% endif %}
+        {% endif %}
         <button onclick="openHelp()" aria-label="Help"
                 class="w-6 h-6 rounded-full border-2 border-white/70 text-white/90 font-bold text-xs
                        hover:bg-white hover:text-blue-700 transition flex items-center justify-center">?</button>
-        <div class="flex items-center gap-1 border-l border-blue-400 pl-4 ml-1">
+        <div class="flex items-center gap-2 border-l border-blue-400 pl-4 ml-1">
+          {% if user %}
+          <span class="text-blue-100 text-xs hidden lg:inline">{{ user.email }}</span>
+          <form method="post" action="/logout" class="inline">
+            <button type="submit" class="hover:underline" data-i18n="nav.logout">Salir</button>
+          </form>
+          {% else %}
+          <a href="/login" class="hover:underline" data-i18n="nav.login">Iniciar Sesión</a>
+          <a href="/register" class="hover:underline" data-i18n="nav.register">Registrarse</a>
+          {% endif %}
+        </div>
+        <div class="flex items-center gap-1 border-l border-blue-400 pl-4">
           <button id="lang-en" onclick="setLang('en')" class="hover:underline transition-opacity">EN</button>
           <span class="opacity-40">|</span>
           <button id="lang-es" onclick="setLang('es')" class="hover:underline transition-opacity">ES</button>
@@ -119,9 +135,21 @@
 
     <!-- Mobile dropdown menu -->
     <div id="mobile-menu" class="hidden md:hidden bg-blue-800 px-4 pb-4 space-y-2 text-sm font-medium">
+      {% if user %}
       <a href="/report-missing" class="block py-2 hover:underline" data-i18n="nav.report_missing">Reportar Desaparecido</a>
       <a href="/report-found"   class="block py-2 hover:underline" data-i18n="nav.report_found">Reportar Hallado</a>
       <a href="/matches"        class="block py-2 hover:underline" data-i18n="nav.view_matches">Ver Coincidencias</a>
+      {% if is_admin %}
+      <a href="/admin" class="block py-2 hover:underline text-yellow-200" data-i18n="nav.admin">Admin</a>
+      {% endif %}
+      <form method="post" action="/logout" class="block py-2">
+        <span class="text-blue-200 text-xs block mb-1">{{ user.email }}</span>
+        <button type="submit" class="hover:underline" data-i18n="nav.logout">Salir</button>
+      </form>
+      {% else %}
+      <a href="/login" class="block py-2 hover:underline" data-i18n="nav.login">Iniciar Sesión</a>
+      <a href="/register" class="block py-2 hover:underline" data-i18n="nav.register">Registrarse</a>
+      {% endif %}
     </div>
   </header>
 
@@ -200,6 +228,22 @@
         'nav.report_missing': 'Report Missing',
         'nav.report_found':   'Report Found',
         'nav.view_matches':   'View Matches',
+        'nav.login':    'Log In',
+        'nav.register': 'Sign Up',
+        'nav.logout':   'Log Out',
+        'nav.admin':    'Admin',
+        'auth.login_title':    'Log In',
+        'auth.register_title': 'Create an Account',
+        'auth.email_label':    'Email',
+        'auth.password_label': 'Password',
+        'auth.password2_label':'Confirm password',
+        'auth.login_btn':      'Log In',
+        'auth.register_btn':   'Create Account',
+        'auth.to_register':    'No account? Sign up',
+        'auth.to_login':       'Already have an account? Log in',
+        'auth.gate_note':      'You must be logged in to use Venezuela Juntos. Your reports and matches are private to your account.',
+        'quality.badge':   'Low photo quality',
+        'quality.warning': 'Your photo may be low quality (blurry, too small, or poorly lit). It was saved, but this can reduce the chance of finding a match. A clearer, well-lit, front-facing photo works best.',
         'footer.text': 'All photos are processed solely for the purpose of reuniting families. Face data is not shared with third parties.',
         'home.title':        'Venezuela Juntos',
         'home.subtitle':     'Bringing Venezuelans back together. Upload a photo to report a missing person or register someone who has been found. Our system automatically matches faces across both lists.',
@@ -243,6 +287,17 @@
         'matches.empty_desc':    'Matches will appear here once the system finds a face that corresponds between the missing and found lists.',
         'matches.btn_missing':   'Report missing',
         'matches.btn_found':     'Register found',
+        'matches.stats_searched': "People you're searching for",
+        'matches.stats_found':    'People you reported found',
+        'matches.stats_matches':  'Your matches',
+        'matches.stats_pending':  'Awaiting a match',
+        'matches.pending_title':  'Your uploads awaiting a match',
+        'matches.pending_desc':   'These are photos you submitted. We keep comparing them automatically — they will move to the Confirmed matches tab when a face matches.',
+        'matches.status_outstanding': 'Match outstanding',
+        'matches.tab_confirmed':  'Confirmed matches',
+        'matches.tab_pending':    'Awaiting a match',
+        'matches.pending_empty_title': 'Nothing awaiting a match',
+        'matches.pending_empty_desc':  "Photos you upload that haven't matched yet will appear here.",
         'disclaimer.title':    'Before You Continue',
         'disclaimer.warning1': 'Some photos on this site may show persons who are injured or have deceased. Viewer discretion is advised.',
         'disclaimer.warning2': 'Facial recognition matches are not 100% accurate. Always verify through additional means before acting on any match.',
@@ -271,6 +326,22 @@
         'nav.report_missing': 'Reportar Desaparecido',
         'nav.report_found':   'Reportar Hallado',
         'nav.view_matches':   'Ver Coincidencias',
+        'nav.login':    'Iniciar Sesión',
+        'nav.register': 'Registrarse',
+        'nav.logout':   'Salir',
+        'nav.admin':    'Admin',
+        'auth.login_title':    'Iniciar Sesión',
+        'auth.register_title': 'Crear una Cuenta',
+        'auth.email_label':    'Correo electrónico',
+        'auth.password_label': 'Contraseña',
+        'auth.password2_label':'Confirmar contraseña',
+        'auth.login_btn':      'Iniciar Sesión',
+        'auth.register_btn':   'Crear Cuenta',
+        'auth.to_register':    '¿No tienes cuenta? Regístrate',
+        'auth.to_login':       '¿Ya tienes cuenta? Inicia sesión',
+        'auth.gate_note':      'Debes iniciar sesión para usar Venezuela Juntos. Tus reportes y coincidencias son privados de tu cuenta.',
+        'quality.badge':   'Foto de baja calidad',
+        'quality.warning': 'Tu foto puede ser de baja calidad (borrosa, muy pequeña o mal iluminada). Se guardó, pero esto puede reducir la probabilidad de encontrar una coincidencia. Una foto nítida, bien iluminada y de frente funciona mejor.',
         'footer.text': 'Todas las fotos son procesadas únicamente con el propósito de reunir familias. Los datos faciales no se comparten con terceros.',
         'home.title':        'Venezuela Juntos',
         'home.subtitle':     'Reencontrando a los venezolanos. Sube una foto para reportar una persona desaparecida o registrar a alguien que fue encontrado. Nuestro sistema compara automáticamente los rostros en ambas listas.',
@@ -314,6 +385,17 @@
         'matches.empty_desc':    'Las coincidencias aparecerán aquí una vez que el sistema encuentre un rostro que corresponda entre las listas de desaparecidos y hallados.',
         'matches.btn_missing':   'Reportar desaparecido',
         'matches.btn_found':     'Registrar hallado',
+        'matches.stats_searched': 'Personas que buscas',
+        'matches.stats_found':    'Personas que reportaste halladas',
+        'matches.stats_matches':  'Tus coincidencias',
+        'matches.stats_pending':  'En espera de coincidencia',
+        'matches.pending_title':  'Tus envíos en espera de coincidencia',
+        'matches.pending_desc':   'Estas son las fotos que enviaste. Las seguimos comparando automáticamente — pasarán a la pestaña de Coincidencias confirmadas cuando un rostro coincida.',
+        'matches.status_outstanding': 'Coincidencia pendiente',
+        'matches.tab_confirmed':  'Coincidencias confirmadas',
+        'matches.tab_pending':    'En espera de coincidencia',
+        'matches.pending_empty_title': 'Nada en espera de coincidencia',
+        'matches.pending_empty_desc':  'Las fotos que subas y que aún no coincidan aparecerán aquí.',
         'disclaimer.title':    'Antes de Continuar',
         'disclaimer.warning1': 'Algunas fotos en este sitio pueden mostrar personas heridas o fallecidas. Se recomienda discreción.',
         'disclaimer.warning2': 'Las coincidencias de reconocimiento facial no son 100% precisas. Siempre verifica por otros medios antes de actuar sobre cualquier coincidencia.',

@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+  <div>
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Admin Console</h1>
+    <p class="text-gray-500 text-sm">
+      Full visibility across all reports and matches. Deleting a person also removes its photo and any matches it is part of.
+    </p>
+  </div>
+  <a href="/admin/logs"
+     class="shrink-0 inline-flex items-center gap-1.5 bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+    </svg>
+    Activity log
+  </a>
+</div>
+
+<!-- Stats -->
+<section class="mb-10">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="text-2xl font-bold text-indigo-600">{{ stats.total_matches }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">Matches created</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="text-2xl font-bold text-red-600">{{ stats.total_missing }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">People searched
+        {% if stats.pending_missing %}<span class="text-gray-400">· {{ stats.pending_missing }} outstanding</span>{% endif %}
+      </p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="text-2xl font-bold text-green-600">{{ stats.total_found }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">People found
+        {% if stats.pending_found %}<span class="text-gray-400">· {{ stats.pending_found }} outstanding</span>{% endif %}
+      </p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="text-2xl font-bold text-gray-700">{{ stats.total_users }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">Users</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="text-2xl font-bold text-gray-700">{{ stats.my_missing }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">You searched</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="text-2xl font-bold text-gray-700">{{ stats.my_found }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">You reported found</p>
+    </div>
+  </div>
+</section>
+
+{% macro thumb(filename) %}
+  <img src="/uploads/{{ filename }}" alt="" class="w-12 h-12 object-cover rounded" />
+{% endmacro %}
+
+{% macro del_form(kind, id, label) %}
+  <form method="post" action="/admin/delete/{{ kind }}/{{ id }}" class="inline"
+        onsubmit="return confirm('Delete this {{ label }}? This cannot be undone.');">
+    <button type="submit"
+            class="text-xs font-medium text-red-600 hover:text-red-800 hover:underline">Delete</button>
+  </form>
+{% endmacro %}
+
+<!-- Users -->
+<section class="mb-10">
+  <h2 class="text-lg font-semibold text-gray-700 mb-3">Users <span class="text-gray-400 font-normal">({{ users|length }})</span></h2>
+  <p class="text-gray-400 text-xs mb-3">Deleting a user keeps their reports — ownership is reassigned to you (admin).</p>
+  <div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-500 text-left">
+        <tr>
+          <th class="px-4 py-2">Email</th><th class="px-4 py-2">Role</th>
+          <th class="px-4 py-2">Missing</th><th class="px-4 py-2">Found</th>
+          <th class="px-4 py-2">Joined</th><th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for u in users %}
+        <tr>
+          <td class="px-4 py-2 break-all">{{ u.email }}</td>
+          <td class="px-4 py-2">
+            {% if u.is_admin %}<span class="text-xs text-indigo-700 bg-indigo-100 rounded px-1.5 py-0.5">admin</span>{% else %}<span class="text-gray-400">user</span>{% endif %}
+          </td>
+          <td class="px-4 py-2">{{ u.missing_count }}</td>
+          <td class="px-4 py-2">{{ u.found_count }}</td>
+          <td class="px-4 py-2 text-gray-400 whitespace-nowrap">{{ u.created_at }}</td>
+          <td class="px-4 py-2 text-right">
+            {% if u.is_self %}
+              <span class="text-xs text-gray-300">you</span>
+            {% else %}
+              <form method="post" action="/admin/delete/user/{{ u.id }}" class="inline"
+                    onsubmit="return confirm('Delete user {{ u.email }}? Their {{ u.missing_count + u.found_count }} report(s) will be reassigned to you. This cannot be undone.');">
+                <button type="submit" class="text-xs font-medium text-red-600 hover:text-red-800 hover:underline">Delete</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Matches -->
+<section class="mb-10">
+  <h2 class="text-lg font-semibold text-gray-700 mb-3">Matches <span class="text-gray-400 font-normal">({{ matches|length }})</span></h2>
+  {% if matches %}
+  <div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-500 text-left">
+        <tr>
+          <th class="px-4 py-2">Missing</th><th class="px-4 py-2">Found</th>
+          <th class="px-4 py-2">Contact</th><th class="px-4 py-2">Score</th>
+          <th class="px-4 py-2">When</th><th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for m in matches %}
+        <tr>
+          <td class="px-4 py-2"><div class="flex items-center gap-2">{{ thumb(m.missing_photo) }}<span>{{ m.missing_name }}</span></div></td>
+          <td class="px-4 py-2">{{ thumb(m.found_photo) }}</td>
+          <td class="px-4 py-2 break-all">{{ m.contact_info }}</td>
+          <td class="px-4 py-2 font-semibold text-indigo-600">{{ m.similarity_pct }}%</td>
+          <td class="px-4 py-2 text-gray-400 whitespace-nowrap">{{ m.matched_at }}</td>
+          <td class="px-4 py-2 text-right">{{ del_form('match', m.id, 'match') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="text-gray-400 text-sm">No matches.</p>{% endif %}
+</section>
+
+<!-- Missing persons -->
+<section class="mb-10">
+  <h2 class="text-lg font-semibold text-gray-700 mb-3">Missing Persons <span class="text-gray-400 font-normal">({{ missing|length }})</span></h2>
+  {% if missing %}
+  <div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-500 text-left">
+        <tr>
+          <th class="px-4 py-2">Photo</th><th class="px-4 py-2">Name</th>
+          <th class="px-4 py-2">Owner</th><th class="px-4 py-2">Matches</th>
+          <th class="px-4 py-2">Quality</th><th class="px-4 py-2">When</th><th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for p in missing %}
+        <tr>
+          <td class="px-4 py-2">{{ thumb(p.photo) }}</td>
+          <td class="px-4 py-2">{{ p.name }}</td>
+          <td class="px-4 py-2 text-gray-500 break-all">{{ p.owner }}</td>
+          <td class="px-4 py-2">{{ p.match_count }}</td>
+          <td class="px-4 py-2">
+            {% if p.low_quality %}<span class="text-xs text-yellow-700 bg-yellow-100 rounded px-1.5 py-0.5">{{ p.quality_note or 'low' }}</span>{% else %}<span class="text-gray-300">—</span>{% endif %}
+          </td>
+          <td class="px-4 py-2 text-gray-400 whitespace-nowrap">{{ p.uploaded_at }}</td>
+          <td class="px-4 py-2 text-right">{{ del_form('missing', p.id, 'missing person') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="text-gray-400 text-sm">No missing-person reports.</p>{% endif %}
+</section>
+
+<!-- Found persons -->
+<section class="mb-10">
+  <h2 class="text-lg font-semibold text-gray-700 mb-3">Found Persons <span class="text-gray-400 font-normal">({{ found|length }})</span></h2>
+  {% if found %}
+  <div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-500 text-left">
+        <tr>
+          <th class="px-4 py-2">Photo</th><th class="px-4 py-2">Contact</th>
+          <th class="px-4 py-2">Owner</th><th class="px-4 py-2">Matches</th>
+          <th class="px-4 py-2">Quality</th><th class="px-4 py-2">When</th><th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for p in found %}
+        <tr>
+          <td class="px-4 py-2">{{ thumb(p.photo) }}</td>
+          <td class="px-4 py-2 break-all">{{ p.contact_info }}</td>
+          <td class="px-4 py-2 text-gray-500 break-all">{{ p.owner }}</td>
+          <td class="px-4 py-2">{{ p.match_count }}</td>
+          <td class="px-4 py-2">
+            {% if p.low_quality %}<span class="text-xs text-yellow-700 bg-yellow-100 rounded px-1.5 py-0.5">{{ p.quality_note or 'low' }}</span>{% else %}<span class="text-gray-300">—</span>{% endif %}
+          </td>
+          <td class="px-4 py-2 text-gray-400 whitespace-nowrap">{{ p.uploaded_at }}</td>
+          <td class="px-4 py-2 text-right">{{ del_form('found', p.id, 'found person') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="text-gray-400 text-sm">No found-person reports.</p>{% endif %}
+</section>
+{% endblock %}

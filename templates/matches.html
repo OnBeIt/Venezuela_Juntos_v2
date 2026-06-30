@@ -3,6 +3,19 @@
 
 {% block content %}
 
+{% if quality_low %}
+<div class="bg-orange-50 border border-orange-300 rounded-xl px-5 py-4 mb-6 flex gap-3 items-start">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500 mt-0.5 shrink-0" fill="none"
+       viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+  </svg>
+  <p class="text-sm text-orange-800" data-i18n="quality.warning">
+    Your photo may be low quality (blurry, too small, or poorly lit). It was saved, but this can reduce the chance of finding a match. A clearer, well-lit, front-facing photo works best.
+  </p>
+</div>
+{% endif %}
+
 {% if no_match %}
 <div class="bg-yellow-50 border border-yellow-300 rounded-xl px-5 py-4 mb-6 flex gap-3 items-start">
   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500 mt-0.5 shrink-0" fill="none"
@@ -25,105 +38,229 @@
   </p>
 </div>
 
-{% if matches %}
-
-<!-- Search bar -->
-<div class="mb-5">
-  <input id="search" type="text"
-         data-i18n-ph="matches.search_placeholder" placeholder="Buscar por nombre…"
-         class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base shadow-sm
-                focus:outline-none focus:ring-2 focus:ring-indigo-400"
-         oninput="filterCards(this.value)" />
-  <p id="no-results" class="hidden text-center text-gray-400 text-sm mt-6"
-     data-i18n="matches.no_results">Ninguna tarjeta coincide con tu búsqueda.</p>
-</div>
-
-<div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-  {% for m in matches %}
-  <div class="match-card bg-white rounded-2xl shadow p-4 md:p-6 border-l-4 border-indigo-500"
-       data-name="{{ m.missing_name | lower }}">
-
-    <!-- Photos side by side -->
-    <div class="flex gap-3 mb-4">
-      <div class="flex-1 text-center">
-        <img src="/uploads/{{ m.missing_photo }}"
-             alt="Missing: {{ m.missing_name }}"
-             class="w-full h-32 md:h-40 object-cover rounded-xl mb-1" />
-        <span class="text-xs font-semibold text-red-600 uppercase tracking-wide"
-              data-i18n="matches.label_missing">Desaparecido/a</span>
-        <p class="text-sm font-medium text-gray-800 mt-0.5 break-words">{{ m.missing_name }}</p>
-        {% if m.missing_description %}
-        <p class="text-xs text-gray-400 mt-0.5">{{ m.missing_description }}</p>
-        {% endif %}
-      </div>
-
-      <div class="flex items-center justify-center text-gray-300 px-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-        </svg>
-      </div>
-
-      <div class="flex-1 text-center">
-        <img src="/uploads/{{ m.found_photo }}"
-             alt="Found person"
-             class="w-full h-32 md:h-40 object-cover rounded-xl mb-1" />
-        <span class="text-xs font-semibold text-green-600 uppercase tracking-wide"
-              data-i18n="matches.label_found">Hallado/a</span>
-        {% if m.found_notes %}
-        <p class="text-xs text-gray-400 mt-0.5">{{ m.found_notes }}</p>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Match score -->
-    <div class="flex items-center gap-2 mb-3">
-      <div class="flex-1 bg-gray-100 rounded-full h-2.5">
-        <div class="bg-indigo-500 h-2.5 rounded-full" style="width: {{ m.similarity_pct }}%"></div>
-      </div>
-      <span class="text-sm font-bold text-indigo-600 whitespace-nowrap">
-        {{ m.similarity_pct }}% <span data-i18n="matches.pct_word">de coincidencia</span>
-      </span>
-    </div>
-
-    <!-- Contact info -->
-    <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-      <p class="text-xs font-semibold text-green-700 uppercase tracking-wide mb-0.5"
-         data-i18n="matches.contact_label">Contacto del rescatista</p>
-      <p class="text-sm text-gray-800 font-medium break-all">{{ m.contact_info }}</p>
-    </div>
-
-    <p class="text-xs text-gray-400 mt-3 text-right">{{ m.matched_at }}</p>
+<!-- Personal stats -->
+{% if stats %}
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+  <div class="bg-white rounded-xl shadow p-4 text-center">
+    <p class="text-2xl font-bold text-red-600">{{ stats.my_missing }}</p>
+    <p class="text-xs text-gray-500 mt-0.5" data-i18n="matches.stats_searched">People you're searching for</p>
   </div>
-  {% endfor %}
-</div>
-
-{% else %}
-<div class="text-center py-16 text-gray-400">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 mx-auto mb-4 opacity-30" fill="none"
-       viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-    <path stroke-linecap="round" stroke-linejoin="round"
-          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-  </svg>
-  <p class="text-lg font-medium" data-i18n="matches.empty_title">Sin coincidencias aún</p>
-  <p class="text-sm mt-1 max-w-xs mx-auto" data-i18n="matches.empty_desc">
-    Las coincidencias aparecerán aquí una vez que el sistema encuentre un rostro correspondiente.
-  </p>
-  <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
-    <a href="/report-missing"
-       class="bg-red-600 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-red-700 transition"
-       data-i18n="matches.btn_missing">Reportar desaparecido</a>
-    <a href="/report-found"
-       class="bg-green-600 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-green-700 transition"
-       data-i18n="matches.btn_found">Registrar hallado</a>
+  <div class="bg-white rounded-xl shadow p-4 text-center">
+    <p class="text-2xl font-bold text-green-600">{{ stats.my_found }}</p>
+    <p class="text-xs text-gray-500 mt-0.5" data-i18n="matches.stats_found">People you reported found</p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-4 text-center">
+    <p class="text-2xl font-bold text-indigo-600">{{ stats.my_matches }}</p>
+    <p class="text-xs text-gray-500 mt-0.5" data-i18n="matches.stats_matches">Your matches</p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-4 text-center">
+    <p class="text-2xl font-bold text-yellow-500">{{ stats.my_pending }}</p>
+    <p class="text-xs text-gray-500 mt-0.5" data-i18n="matches.stats_pending">Awaiting a match</p>
   </div>
 </div>
 {% endif %}
+
+{% set start = 'matches' if matches else ('pending' if pending else 'matches') %}
+
+<!-- Tabs -->
+<div class="border-b border-gray-200 mb-6 flex gap-6">
+  <button id="tab-btn-matches" type="button" onclick="showTab('matches')"
+          class="pb-3 -mb-px border-b-2 text-sm transition flex items-center gap-2
+                 {% if start == 'matches' %}border-indigo-500 text-indigo-600 font-semibold{% else %}border-transparent text-gray-500 font-medium hover:text-gray-700{% endif %}">
+    <span data-i18n="matches.tab_confirmed">Confirmed matches</span>
+    <span class="text-xs bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5">{{ matches|length }}</span>
+  </button>
+  <button id="tab-btn-pending" type="button" onclick="showTab('pending')"
+          class="pb-3 -mb-px border-b-2 text-sm transition flex items-center gap-2
+                 {% if start == 'pending' %}border-indigo-500 text-indigo-600 font-semibold{% else %}border-transparent text-gray-500 font-medium hover:text-gray-700{% endif %}">
+    <span data-i18n="matches.tab_pending">Awaiting a match</span>
+    <span class="text-xs bg-yellow-100 text-yellow-700 rounded-full px-2 py-0.5">{{ pending|length }}</span>
+  </button>
+</div>
+
+<!-- Tab: Confirmed matches -->
+<div id="tab-matches" class="{% if start != 'matches' %}hidden{% endif %}">
+  {% if matches %}
+
+  <!-- Search bar -->
+  <div class="mb-5">
+    <input id="search" type="text"
+           data-i18n-ph="matches.search_placeholder" placeholder="Buscar por nombre…"
+           class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base shadow-sm
+                  focus:outline-none focus:ring-2 focus:ring-indigo-400"
+           oninput="filterCards(this.value)" />
+    <p id="no-results" class="hidden text-center text-gray-400 text-sm mt-6"
+       data-i18n="matches.no_results">Ninguna tarjeta coincide con tu búsqueda.</p>
+  </div>
+
+  <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    {% for m in matches %}
+    <div class="match-card bg-white rounded-2xl shadow p-4 md:p-6 border-l-4 border-indigo-500"
+         data-name="{{ m.missing_name | lower }}">
+
+      <!-- Photos side by side -->
+      <div class="flex gap-3 mb-4">
+        <div class="flex-1 text-center">
+          <img src="/uploads/{{ m.missing_photo }}"
+               alt="Missing: {{ m.missing_name }}"
+               class="w-full h-32 md:h-40 object-cover rounded-xl mb-1" />
+          <span class="text-xs font-semibold text-red-600 uppercase tracking-wide"
+                data-i18n="matches.label_missing">Desaparecido/a</span>
+          <p class="text-sm font-medium text-gray-800 mt-0.5 break-words">{{ m.missing_name }}</p>
+          {% if m.missing_description %}
+          <p class="text-xs text-gray-400 mt-0.5">{{ m.missing_description }}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center justify-center text-gray-300 px-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </div>
+
+        <div class="flex-1 text-center">
+          <img src="/uploads/{{ m.found_photo }}"
+               alt="Found person"
+               class="w-full h-32 md:h-40 object-cover rounded-xl mb-1" />
+          <span class="text-xs font-semibold text-green-600 uppercase tracking-wide"
+                data-i18n="matches.label_found">Hallado/a</span>
+          {% if m.found_notes %}
+          <p class="text-xs text-gray-400 mt-0.5">{{ m.found_notes }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if m.low_quality %}
+      <div class="flex items-center gap-1.5 mb-2 text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded-md px-2 py-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <span data-i18n="quality.badge">Low photo quality</span>
+      </div>
+      {% endif %}
+
+      <!-- Match score -->
+      <div class="flex items-center gap-2 mb-3">
+        <div class="flex-1 bg-gray-100 rounded-full h-2.5">
+          <div class="bg-indigo-500 h-2.5 rounded-full" style="width: {{ m.similarity_pct }}%"></div>
+        </div>
+        <span class="text-sm font-bold text-indigo-600 whitespace-nowrap">
+          {{ m.similarity_pct }}% <span data-i18n="matches.pct_word">de coincidencia</span>
+        </span>
+      </div>
+
+      <!-- Contact info -->
+      <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+        <p class="text-xs font-semibold text-green-700 uppercase tracking-wide mb-0.5"
+           data-i18n="matches.contact_label">Contacto del rescatista</p>
+        <p class="text-sm text-gray-800 font-medium break-all">{{ m.contact_info }}</p>
+      </div>
+
+      <p class="text-xs text-gray-400 mt-3 text-right">{{ m.matched_at }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="text-center py-16 text-gray-400">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 mx-auto mb-4 opacity-30" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p class="text-lg font-medium" data-i18n="matches.empty_title">Sin coincidencias aún</p>
+    <p class="text-sm mt-1 max-w-xs mx-auto" data-i18n="matches.empty_desc">
+      Las coincidencias aparecerán aquí una vez que el sistema encuentre un rostro correspondiente.
+    </p>
+    <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+      <a href="/report-missing"
+         class="bg-red-600 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-red-700 transition"
+         data-i18n="matches.btn_missing">Reportar desaparecido</a>
+      <a href="/report-found"
+         class="bg-green-600 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-green-700 transition"
+         data-i18n="matches.btn_found">Registrar hallado</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Tab: Awaiting a match -->
+<div id="tab-pending" class="{% if start != 'pending' %}hidden{% endif %}">
+  {% if pending %}
+  <p class="text-gray-500 text-sm mb-4" data-i18n="matches.pending_desc">
+    These are photos you submitted. We keep comparing them automatically — they will move to the Confirmed matches tab when a face matches.
+  </p>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {% for p in pending %}
+    <div class="bg-white rounded-2xl shadow p-3 border-l-4 border-yellow-400">
+      <img src="/uploads/{{ p.photo }}" alt="" class="w-full h-32 object-cover rounded-xl mb-2" />
+      {% if p.kind == 'missing' %}
+      <span class="text-xs font-semibold text-red-600 uppercase tracking-wide" data-i18n="matches.label_missing">Desaparecido/a</span>
+      {% else %}
+      <span class="text-xs font-semibold text-green-600 uppercase tracking-wide" data-i18n="matches.label_found">Hallado/a</span>
+      {% endif %}
+      <p class="text-sm font-medium text-gray-800 mt-0.5 break-words">{{ p.title }}</p>
+      {% if p.subtitle %}<p class="text-xs text-gray-400 mt-0.5 break-words">{{ p.subtitle }}</p>{% endif %}
+      {% if p.low_quality %}
+      <div class="flex items-center gap-1 mt-2 text-xs text-orange-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <span data-i18n="quality.badge">Low photo quality</span>
+      </div>
+      {% endif %}
+      <div class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full px-2.5 py-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+        <span data-i18n="matches.status_outstanding">Match outstanding</span>
+      </div>
+      <p class="text-xs text-gray-400 mt-2">{{ p.uploaded_at }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-16 text-gray-400">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 mx-auto mb-4 opacity-30" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+    </svg>
+    <p class="text-lg font-medium" data-i18n="matches.pending_empty_title">Nothing awaiting a match</p>
+    <p class="text-sm mt-1 max-w-xs mx-auto" data-i18n="matches.pending_empty_desc">
+      Photos you upload that haven't matched yet will appear here.
+    </p>
+    <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+      <a href="/report-missing"
+         class="bg-red-600 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-red-700 transition"
+         data-i18n="matches.btn_missing">Reportar desaparecido</a>
+      <a href="/report-found"
+         class="bg-green-600 text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-green-700 transition"
+         data-i18n="matches.btn_found">Registrar hallado</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
+  function showTab(name) {
+    ['matches', 'pending'].forEach(function(t) {
+      var panel = document.getElementById('tab-' + t);
+      if (panel) panel.classList.toggle('hidden', t !== name);
+      var btn = document.getElementById('tab-btn-' + t);
+      if (btn) {
+        var active = (t === name);
+        btn.classList.toggle('border-indigo-500', active);
+        btn.classList.toggle('text-indigo-600', active);
+        btn.classList.toggle('font-semibold', active);
+        btn.classList.toggle('border-transparent', !active);
+        btn.classList.toggle('text-gray-500', !active);
+        btn.classList.toggle('font-medium', !active);
+      }
+    });
+  }
+
   function filterCards(query) {
     var q = query.trim().toLowerCase();
     var cards = document.querySelectorAll('.match-card');
